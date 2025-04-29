@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Report filter
-// @version      1.1
+// @version      1.2
 // @description  Does what it says on the tin
 // @author       Jindosh
 // @match        *://*/reports/*
@@ -38,7 +38,7 @@
             const forumLink = report.querySelector('.structItem-forum a');
             if (forumLink) {
                 const forumName = forumLink.textContent.trim();
-                if (!allowedForums.includes(forumName)) {
+                if (!allowedForums.some(f => f.toLowerCase() === forumName.toLowerCase())) {
                     report.style.display = 'none';
                 } else {
                     report.style.display = '';
