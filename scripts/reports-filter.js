@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Report filter
-// @version      1.0
+// @version      1.1
 // @description  Does what it says on the tin
 // @author       Jindosh
 // @match        *://*/reports/*
@@ -10,11 +10,10 @@
     'use strict';
 
     const STORAGE_KEY = 'xf-report-filter-allowedForums';
-    const DEFAULT_FORUMS = ['Requests', 'Instagram', 'Model Discussion'];
 
     function getAllowedForums() {
         const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) return DEFAULT_FORUMS;
+        if (!stored) return [];
         return JSON.parse(stored);
     }
 
