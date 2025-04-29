@@ -4,6 +4,8 @@
 // @description  Does what it says on the tin
 // @author       Jindosh
 // @match        *://*/reports/*
+// @updateURL    https://github.com/Kirin-Jindosh/forum-stuff/raw/refs/heads/main/scripts/ReportsFilter/reports-filter.user.js
+// @downloadURL  https://github.com/Kirin-Jindosh/forum-stuff/raw/refs/heads/main/scripts/ReportsFilter/reports-filter.user.js
 // ==/UserScript==
 
 (function () {
