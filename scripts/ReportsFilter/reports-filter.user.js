@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Report filter
-// @version      1.3.1
+// @version      1.3.2
 // @description  Does what it says on the tin (except it does the opposite now lol)
 // @author       Jindosh
 // @match        *://*/reports/*
