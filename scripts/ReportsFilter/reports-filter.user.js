@@ -26,7 +26,9 @@
     function filterReports() {
         const allowedForums = getAllowedForums().map(f => f.toLowerCase());
         const allBlocks = document.querySelectorAll('.structItemContainer');
-    
+
+        if (allowedForums.length === 0) return;
+
         allBlocks.forEach(container => {
             const matchingReports = [];
             const otherReports = [];
