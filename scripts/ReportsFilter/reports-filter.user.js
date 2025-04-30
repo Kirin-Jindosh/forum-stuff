@@ -25,30 +25,27 @@
 
     function filterReports() {
         const allowedForums = getAllowedForums().map(f => f.toLowerCase());
-        const allBlocks = document.querySelectorAll('.structItemContainer');
-
         if (allowedForums.length === 0) return;
-
+    
+        const allBlocks = document.querySelectorAll('.structItemContainer');
+    
         allBlocks.forEach(container => {
             const matchingReports = [];
-            const otherReports = [];
     
             const reports = container.querySelectorAll('.structItem.structItem--report');
             reports.forEach(report => {
                 const forumLink = report.querySelector('.structItem-forum a');
                 if (forumLink) {
                     const forumName = forumLink.textContent.trim().toLowerCase();
-                    if (allowedForums.length === 0 || allowedForums.includes(forumName)) {
+                    if (allowedForums.includes(forumName)) {
                         matchingReports.push(report);
-                    } else {
-                        otherReports.push(report);
                     }
                 }
             });
     
-            matchingReports.concat(otherReports).forEach(report => {
-                container.appendChild(report);
-            });
+            for (let i = matchingReports.length - 1; i >= 0; i--) {
+                container.prepend(matchingReports[i]);
+            }
         });
     }
 
