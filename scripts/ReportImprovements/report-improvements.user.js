@@ -12,6 +12,7 @@
     'use strict';
 
     const STORAGE_KEY = 'xf-report-filter-allowedForums';
+    const HMMM = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png'
 
     function getAllowedForums() {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -59,7 +60,7 @@
                 const forumLink = report.querySelector('.structItem-forum a');
                 if (forumLink) {
                     const forumName = forumLink.textContent.trim().toLowerCase();
-                    if (allowedForums.includes(forumName)) {
+                    if (allowedForums.some(f => forumName.includes(f))) {
                         const clone = report.cloneNode(true);
                         body.appendChild(clone);
                         matchCount++;
@@ -80,17 +81,19 @@
 
     function createSettingsUI() {
         const btn = document.createElement('button');
-        btn.textContent = 'Filter';
         btn.style.position = 'fixed';
         btn.style.bottom = '20px';
         btn.style.right = '60px';
         btn.style.zIndex = '1000';
-        btn.style.padding = '8px 12px';
-        btn.style.background = '#3db7c7';
-        btn.style.color = '#fff';
+        btn.style.width = '40px';
+        btn.style.height = '40px';
+        btn.style.backgroundImage = `url('${HMMM}')`; 
+        btn.style.backgroundSize = 'contain';
+        btn.style.backgroundRepeat = 'no-repeat';
+        btn.style.backgroundColor = 'transparent';
         btn.style.border = 'none';
-        btn.style.borderRadius = '5px';
         btn.style.cursor = 'pointer';
+        btn.title = 'Filter settings';
         document.body.appendChild(btn);
 
         const popup = document.createElement('div');
