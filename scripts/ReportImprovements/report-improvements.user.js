@@ -1,18 +1,18 @@
 // ==UserScript==
-// @name         Report Improvements Dev
+// @name         Report Improvements
 // @version      1.4
 // @description  Various improvements to XenForo reports
 // @author       Jindosh
 // @match        *://*/reports/*
-// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/report-improvements.user.js
-// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/report-improvements.user.js
+// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/report-improvements.user.js
+// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/report-improvements.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
     const STORAGE_KEY = 'xf-report-filter-allowedForums';
-    const HMMM = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png'
+    const HMMM = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/PepeHmmm.png'
 
     function getAllowedForums() {
         const stored = localStorage.getItem(STORAGE_KEY);
