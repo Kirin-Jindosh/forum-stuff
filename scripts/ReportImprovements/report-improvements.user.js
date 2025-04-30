@@ -1,0 +1,162 @@
+// ==UserScript==
+// @name         Report Improvements Dev
+// @version      1.4
+// @description  Various improvements to XenForo reports
+// @author       Jindosh
+// @match        *://*/reports/*
+// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/report-improvements.user.js
+// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/report-improvements.user.js
+// ==/UserScript==
+
+(function () {
+    'use strict';
+
+    const STORAGE_KEY = 'xf-report-filter-allowedForums';
+    const HMMM = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png'
+
+    function getAllowedForums() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return [];
+        return JSON.parse(stored);
+    }
+
+    function saveAllowedForums(forums) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(forums));
+    }
+
+    function hoistReports() {
+        const allowedForums = getAllowedForums().map(f => f.toLowerCase());
+        const existingSection = document.getElementById('xf-report-hoist');
+        if (existingSection) existingSection.remove();
+    
+        if (allowedForums.length === 0) return;
+    
+        const allBlocks = document.querySelectorAll('.structItemContainer');
+    
+        const hoistedContainer = document.createElement('div');
+        hoistedContainer.id = 'xf-report-hoist';
+        hoistedContainer.className = 'block';
+        hoistedContainer.style.marginBottom = '20px';
+    
+        const inner = document.createElement('div');
+        inner.className = 'block-container';
+        hoistedContainer.appendChild(inner);
+    
+        const header = document.createElement('div');
+        header.className = 'block-header';
+        header.innerHTML = `<span class="block-header--title">Filtered reports:</span>`;
+        inner.appendChild(header);
+    
+        const body = document.createElement('div');
+        body.className = 'structItemContainer';
+        inner.appendChild(body);
+    
+        let matchCount = 0;
+    
+        const openBlock = allBlocks[0];
+        if (openBlock) {
+            const reports = openBlock.querySelectorAll('.structItem.structItem--report');
+            reports.forEach(report => {
+                const forumLink = report.querySelector('.structItem-forum a');
+                if (forumLink) {
+                    const forumName = forumLink.textContent.trim().toLowerCase();
+                    if (allowedForums.some(f => forumName.includes(f))) {
+                        const clone = report.cloneNode(true);
+                        body.appendChild(clone);
+                        matchCount++;
+                    }
+                }
+            });
+        }
+    
+        if (matchCount > 0) {
+            const mainList = document.querySelector('.p-body-main .block-container');
+            if (mainList) {
+                mainList.parentNode.insertBefore(hoistedContainer, mainList);
+            } else {
+                document.body.insertBefore(hoistedContainer, document.body.firstChild);
+            }
+        }
+    }
+
+    function createSettingsUI() {
+        const btn = document.createElement('button');
+        btn.style.position = 'fixed';
+        btn.style.bottom = '20px';
+        btn.style.right = '60px';
+        btn.style.zIndex = '1000';
+        btn.style.width = '40px';
+        btn.style.height = '40px';
+        btn.style.backgroundImage = `url('${HMMM}')`; 
+        btn.style.backgroundSize = 'contain';
+        btn.style.backgroundRepeat = 'no-repeat';
+        btn.style.backgroundColor = 'transparent';
+        btn.style.border = 'none';
+        btn.style.cursor = 'pointer';
+        btn.title = 'Filter settings';
+        document.body.appendChild(btn);
+
+        const popup = document.createElement('div');
+        popup.style.position = 'fixed';
+        popup.style.bottom = '60px';
+        popup.style.right = '20px';
+        popup.style.zIndex = '1001';
+        popup.style.background = '#262626';
+        popup.style.border = '1px solid #ccc';
+        popup.style.borderRadius = '5px';
+        popup.style.padding = '10px';
+        popup.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        popup.style.display = 'none';
+
+        popup.innerHTML = `
+            <label style="font-weight: bold; display:block; margin-bottom: 5px;">Subforums (one per line):</label>
+            <textarea id="xf-forum-editor" style="width: 200px; height: 100px;"></textarea><br>
+            <button id="xf-save-forums" style="margin-top: 8px;">Filter</button>
+        `;
+
+        document.body.appendChild(popup);
+
+        btn.addEventListener('click', () => {
+            const current = getAllowedForums();
+            document.getElementById('xf-forum-editor').value = current.join('\n');
+            popup.style.display = (popup.style.display === 'none') ? 'block' : 'none';
+        });
+
+        document.getElementById('xf-save-forums').addEventListener('click', () => {
+            const lines = document.getElementById('xf-forum-editor').value
+                .split('\n')
+                .map(f => f.trim())
+                .filter(f => f.length > 0);
+            saveAllowedForums(lines);
+            hoistReports();
+            popup.style.display = 'none';
+        });
+    }
+
+    function setupObserver() {
+        const container = document.querySelector('.structItemContainer');
+        if (container) {
+            const observer = new MutationObserver(() => {
+                hoistReports();
+            });
+            observer.observe(container, { childList: true, subtree: true });
+        }
+    }
+
+    function waitForReportsContainer(callback) {
+        const check = setInterval(() => {
+            const container = document.querySelector('.structItemContainer');
+            if (container) {
+                clearInterval(check);
+                callback();
+            }
+        }, 200);
+    }
+
+    waitForReportsContainer(() => {
+        hoistReports();
+        createSettingsUI();
+        setupObserver();
+    });
+
+})();
