@@ -4,8 +4,8 @@
 // @description  Does what it says on the tin (except it does the opposite now lol)
 // @author       Jindosh
 // @match        *://*/reports/*
-// @updateURL    https://github.com/Kirin-Jindosh/forum-stuff/raw/refs/heads/main/scripts/ReportsFilter/reports-filter.user.js
-// @downloadURL  https://github.com/Kirin-Jindosh/forum-stuff/raw/refs/heads/main/scripts/ReportsFilter/reports-filter.user.js
+// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportsFilter/reports-filter.user.js
+// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportsFilter/reports-filter.user.js
 // ==/UserScript==
 
 (function () {
