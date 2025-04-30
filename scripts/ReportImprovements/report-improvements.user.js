@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name         Report filter
-// @version      1.3.2
-// @description  Does what it says on the tin (except it does the opposite now lol)
+// @name         Report Improvements Dev
+// @version      1.4
+// @description  Various improvements to XenForo reports
 // @author       Jindosh
 // @match        *://*/reports/*
-// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportsFilter/reports-filter.user.js
-// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportsFilter/reports-filter.user.js
+// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/report-improvements.user.js
+// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/report-improvements.user.js
 // ==/UserScript==
 
 (function () {
@@ -23,7 +23,7 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(forums));
     }
 
-    function filterReports() {
+    function hoistReports() {
         const allowedForums = getAllowedForums().map(f => f.toLowerCase());
         const existingSection = document.getElementById('xf-report-hoist');
         if (existingSection) existingSection.remove();
@@ -43,7 +43,7 @@
     
         const header = document.createElement('div');
         header.className = 'block-header';
-        header.innerHTML = `<span class="block-header--title">Your Reports</span>`;
+        header.innerHTML = `<span class="block-header--title">Filtered reports:</span>`;
         inner.appendChild(header);
     
         const body = document.createElement('div');
@@ -83,7 +83,7 @@
         btn.textContent = 'Filter';
         btn.style.position = 'fixed';
         btn.style.bottom = '20px';
-        btn.style.right = '20px';
+        btn.style.right = '60px';
         btn.style.zIndex = '1000';
         btn.style.padding = '8px 12px';
         btn.style.background = '#3db7c7';
@@ -125,7 +125,7 @@
                 .map(f => f.trim())
                 .filter(f => f.length > 0);
             saveAllowedForums(lines);
-            filterReports();
+            hoistReports();
             popup.style.display = 'none';
         });
     }
@@ -134,7 +134,7 @@
         const container = document.querySelector('.structItemContainer');
         if (container) {
             const observer = new MutationObserver(() => {
-                filterReports();
+                hoistReports();
             });
             observer.observe(container, { childList: true, subtree: true });
         }
@@ -151,7 +151,7 @@
     }
 
     waitForReportsContainer(() => {
-        filterReports();
+        hoistReports();
         createSettingsUI();
         setupObserver();
     });
