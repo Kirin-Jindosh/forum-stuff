@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Report filter
-// @version      1.3
+// @version      1.3.1
 // @description  Does what it says on the tin (except it does the opposite now lol)
 // @author       Jindosh
 // @match        *://*/reports/*
-// @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportsFilter/reports-filter.user.js
-// @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportsFilter/reports-filter.user.js
+// @updateURL    https://github.com/Kirin-Jindosh/forum-stuff/raw/refs/heads/main/scripts/ReportsFilter/reports-filter.user.js
+// @downloadURL  https://github.com/Kirin-Jindosh/forum-stuff/raw/refs/heads/main/scripts/ReportsFilter/reports-filter.user.js
 // ==/UserScript==
 
 (function () {
@@ -25,28 +25,29 @@
 
     function filterReports() {
         const allowedForums = getAllowedForums().map(f => f.toLowerCase());
-        const container = document.querySelector('.structItemContainer');
-        if (!container) return;
+        const allBlocks = document.querySelectorAll('.structItemContainer');
     
-        const matchingReports = [];
-        const otherReports = [];
+        allBlocks.forEach(container => {
+            const matchingReports = [];
+            const otherReports = [];
     
-        const reports = document.querySelectorAll('.structItem.structItem--report');
-        reports.forEach(report => {
-            const forumLink = report.querySelector('.structItem-forum a');
-            if (forumLink) {
-                const forumName = forumLink.textContent.trim().toLowerCase();
-                if (allowedForums.length === 0 || allowedForums.includes(forumName)) {
-                    matchingReports.push(report);
-                } else {
-                    otherReports.push(report);
+            const reports = container.querySelectorAll('.structItem.structItem--report');
+            reports.forEach(report => {
+                const forumLink = report.querySelector('.structItem-forum a');
+                if (forumLink) {
+                    const forumName = forumLink.textContent.trim().toLowerCase();
+                    if (allowedForums.length === 0 || allowedForums.includes(forumName)) {
+                        matchingReports.push(report);
+                    } else {
+                        otherReports.push(report);
+                    }
                 }
-            }
-        });
+            });
     
-        container.innerHTML = '';
-        matchingReports.forEach(report => container.appendChild(report));
-        otherReports.forEach(report => container.appendChild(report));
+            matchingReports.concat(otherReports).forEach(report => {
+                container.appendChild(report);
+            });
+        });
     }
 
     function createSettingsUI() {
