@@ -25,28 +25,57 @@
 
     function filterReports() {
         const allowedForums = getAllowedForums().map(f => f.toLowerCase());
+        const existingSection = document.getElementById('xf-report-hoist');
+        if (existingSection) existingSection.remove();
+    
         if (allowedForums.length === 0) return;
     
         const allBlocks = document.querySelectorAll('.structItemContainer');
     
-        allBlocks.forEach(container => {
-            const matchingReports = [];
+        const hoistedContainer = document.createElement('div');
+        hoistedContainer.id = 'xf-report-hoist';
+        hoistedContainer.className = 'block';
+        hoistedContainer.style.marginBottom = '20px';
     
-            const reports = container.querySelectorAll('.structItem.structItem--report');
+        const inner = document.createElement('div');
+        inner.className = 'block-container';
+        hoistedContainer.appendChild(inner);
+    
+        const header = document.createElement('div');
+        header.className = 'block-header';
+        header.innerHTML = `<span class="block-header--title">Your Reports</span>`;
+        inner.appendChild(header);
+    
+        const body = document.createElement('div');
+        body.className = 'structItemContainer';
+        inner.appendChild(body);
+    
+        let matchCount = 0;
+    
+        const openBlock = allBlocks[0];
+        if (openBlock) {
+            const reports = openBlock.querySelectorAll('.structItem.structItem--report');
             reports.forEach(report => {
                 const forumLink = report.querySelector('.structItem-forum a');
                 if (forumLink) {
                     const forumName = forumLink.textContent.trim().toLowerCase();
                     if (allowedForums.includes(forumName)) {
-                        matchingReports.push(report);
+                        const clone = report.cloneNode(true);
+                        body.appendChild(clone);
+                        matchCount++;
                     }
                 }
             });
+        }
     
-            for (let i = matchingReports.length - 1; i >= 0; i--) {
-                container.prepend(matchingReports[i]);
+        if (matchCount > 0) {
+            const mainList = document.querySelector('.p-body-main .block-container');
+            if (mainList) {
+                mainList.parentNode.insertBefore(hoistedContainer, mainList);
+            } else {
+                document.body.insertBefore(hoistedContainer, document.body.firstChild);
             }
-        });
+        }
     }
 
     function createSettingsUI() {
