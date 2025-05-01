@@ -160,15 +160,11 @@
             method: 'GET',
             url: window.location.href,
             onload: function (response) {
-                console.log('[Live Refresh] Response loaded');
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(response.responseText, 'text/html');
-                console.log('[Live Refresh] Parsed document:', doc);
     
                 const openReportsNew = Array.from(doc.querySelectorAll('.structItemContainer'))[0]
                     .querySelectorAll('.structItem.structItem--report');
-                    
-                console.log('[Live Refresh] Fetched reports:', openReportsNew.length);
 
                 const realContainers = Array.from(document.querySelectorAll('.structItemContainer'))
                     .filter(c => !c.closest('#xf-report-hoist'));
@@ -179,17 +175,12 @@
     
                 const newKeys = new Set([...openReportsNew].map(getReportKey));
                 const currentKeys = new Set([...currentReports].map(getReportKey));
-
-                console.log('[Live Refresh] Current reports:', currentReports.length);
-                console.log('[Live Refresh] New report keys:', newKeys.size);
-                console.log('[Live Refresh] Current report keys:', currentKeys.size);
     
                 currentReports.forEach(r => {
                     const key = getReportKey(r);
                     if (key && !newKeys.has(key)) {
                         console.log(`[Live Refresh] Report ${key} is missing (resolved)`);
-                        r.style.opacity = '0.5';
-                        r.style.background = '#444';
+                        r.style.display = 'none';
                     }
                 });
     
@@ -198,7 +189,6 @@
                     openReportsNew.forEach(r => {
                         const key = getReportKey(r);
                         if (key && !currentKeys.has(key)) {
-                            console.log(`[Live Refresh] New report detected: ${key}`);
                             if (!container.querySelector(`[href="${key}"]`)) {
                                 const clone = r.cloneNode(true);
                                 container.insertBefore(clone, container.firstChild);
