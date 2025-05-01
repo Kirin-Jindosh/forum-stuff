@@ -193,15 +193,19 @@
                     }
                 });
     
-                const container = document.querySelectorAll('.structItemContainer')[0];
-                openReportsNew.forEach(r => {
-                    const key = getReportKey(r);
-                    if (key && !currentKeys.has(key)) {
-                        console.log(`[Live Refresh] New report detected: ${key}`);
-                        const clone = r.cloneNode(true);
-                        container.insertBefore(clone, container.firstChild);
-                    }
-                });
+                const container = realContainers.length > 0 ? realContainers[0] : null;
+                if (container) {
+                    openReportsNew.forEach(r => {
+                        const key = getReportKey(r);
+                        if (key && !currentKeys.has(key)) {
+                            console.log(`[Live Refresh] New report detected: ${key}`);
+                            if (!container.querySelector(`[href="${key}"]`)) {
+                                const clone = r.cloneNode(true);
+                                container.insertBefore(clone, container.firstChild);
+                            }
+                        }
+                    });
+                }
     
                 hoistReports();
             },
