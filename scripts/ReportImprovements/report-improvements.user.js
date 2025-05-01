@@ -180,7 +180,7 @@
                     const key = getReportKey(r);
                     if (key && !newKeys.has(key)) {
                         console.log(`[Live Refresh] Report ${key} is missing (resolved)`);
-                        r.style.display = 'none';
+                        r.remove();
                     }
                 });
     
