@@ -14,7 +14,7 @@
 
     const STORAGE_KEY = 'xf-report-filter-allowedForums';
     const LIVE_REFRESH_KEY = 'xf-report-filter-liveRefreshEnabled';
-    const REFRESH_INTERVAL = 10000;
+    const REFRESH_INTERVAL = 15000;
     const ICON_URL = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png';
 
     let refreshIntervalId = null;
@@ -125,10 +125,10 @@
         popup.style.display = 'none';
 
         popup.innerHTML = `
-            <label style="font-weight: bold; display:block; margin-bottom: 5px;">Subforums (one per line):</label>
+            <label style="font-weight: bold; display:block; margin-bottom: 5px;">Subforums to highlight (one per line):</label>
             <textarea id="xf-forum-editor" style="width: 200px; height: 100px;"></textarea><br>
             <label style="display:block; margin-top:10px;">
-                <input type="checkbox" id="xf-live-refresh-toggle"> Live refresh (every 10s)
+                <input type="checkbox" id="xf-live-refresh-toggle"> Live update reports
             </label>
             <button id="xf-save-forums" style="margin-top: 8px;">Filter</button>
         `;
@@ -181,8 +181,8 @@
                 const currentKeys = new Set([...currentReports].map(getReportKey));
 
                 console.log('[Live Refresh] Current reports:', currentReports.length);
-                console.log('[Live Refresh] New report keys:', newKeys.length);
-                console.log('[Live Refresh] Current report keys:', currentKeys.length);
+                console.log('[Live Refresh] New report keys:', newKeys.size);
+                console.log('[Live Refresh] Current report keys:', currentKeys.size);
     
                 currentReports.forEach(r => {
                     const key = getReportKey(r);
