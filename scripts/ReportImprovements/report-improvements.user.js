@@ -139,14 +139,14 @@
         popup.style.display = 'none';
 
         popup.innerHTML = `
-            <div id="xf-live-refresh-warning" style="color:rgb(218, 20, 20); margin-top: 8px; display: none;">
-                Live refresh is enabled in another tab. This tab will not auto-update.
-            </div>
             <label style="font-weight: bold; display:block; margin-bottom: 5px;">Subforums to highlight (one per line):</label>
             <textarea id="xf-forum-editor" style="width: 200px; height: 100px;"></textarea><br>
             <label style="display:block; margin-top:10px;">
                 <input type="checkbox" id="xf-live-refresh-toggle"> Live update reports
             </label>
+            <div id="xf-live-refresh-warning" style="color:rgb(218, 20, 20); margin-top: 8px; display: none;">
+                Live refresh is already enabled in another tab.
+            </div>
             <button id="xf-save-forums" style="margin-top: 8px;">Filter</button>
         `;
 
@@ -255,11 +255,17 @@
 
     function startHeartbeat() {
         setInterval(() => {
-            const data = {
-                tabId: TAB_ID,
-                timestamp: Date.now()
-            };
-            localStorage.setItem(HEARTBEAT_KEY, JSON.stringify(data));
+            const data = JSON.parse(localStorage.getItem(HEARTBEAT_KEY) || '{}');
+            const timeSinceLastBeat = Date.now() - (data.timestamp || 0);
+            const isStale = timeSinceLastBeat > 7000;
+    
+            if (data.tabId === TAB_ID || isStale) {
+                const newBeat = {
+                    tabId: TAB_ID,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(HEARTBEAT_KEY, JSON.stringify(newBeat));
+            }
         }, 3000);
     }
 
