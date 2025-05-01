@@ -6,6 +6,7 @@
 // @match        *://*/reports/*
 // @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/report-improvements.user.js
 // @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/report-improvements.user.js
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 (function () {
@@ -154,44 +155,60 @@
         });
     }
 
-    async function checkForReportUpdates() {
-        try {
-            const res = await fetch(window.location.href, { credentials: 'include' });
-            const text = await res.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(text, 'text/html');
+    function checkForReportUpdates() {
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: window.location.href,
+            onload: function (response) {
+                console.log('[Live Refresh] Response loaded');
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(response.responseText, 'text/html');
+                console.log('[Live Refresh] Parsed document:', doc);
+    
+                const openReportsNew = Array.from(doc.querySelectorAll('.structItemContainer'))[0]
+                    .querySelectorAll('.structItem.structItem--report');
+                    
+                console.log('[Live Refresh] Fetched reports:', openReportsNew.length);
 
-            const openReportsNew = Array.from(doc.querySelectorAll('.structItemContainer'))[0]
-                .querySelectorAll('.structItem.structItem--report');
+                const realContainers = Array.from(document.querySelectorAll('.structItemContainer'))
+                    .filter(c => !c.closest('#xf-report-hoist'));
 
-            const currentReports = document.querySelectorAll('.structItemContainer')[0]
-                .querySelectorAll('.structItem.structItem--report');
+                const currentReports = realContainers.length > 0
+                    ? realContainers[0].querySelectorAll('.structItem.structItem--report')
+                    : [];
+    
+                const newKeys = new Set([...openReportsNew].map(getReportKey));
+                const currentKeys = new Set([...currentReports].map(getReportKey));
 
-            const newKeys = new Set([...openReportsNew].map(getReportKey));
-            const currentKeys = new Set([...currentReports].map(getReportKey));
-
-            currentReports.forEach(r => {
-                const key = getReportKey(r);
-                if (key && !newKeys.has(key)) {
-                    r.style.opacity = '0.5';
-                    r.style.background = '#590c0c';
-                }
-            });
-
-            const container = document.querySelectorAll('.structItemContainer')[0];
-            openReportsNew.forEach(r => {
-                const key = getReportKey(r);
-                if (key && !currentKeys.has(key)) {
-                    const clone = r.cloneNode(true);
-                    container.insertBefore(clone, container.firstChild);
-                }
-            });
-
-            hoistReports();
-
-        } catch (err) {
-            console.error('Live refresh failed:', err);
-        }
+                console.log('[Live Refresh] Current reports:', currentReports.length);
+                console.log('[Live Refresh] New report keys:', newKeys.length);
+                console.log('[Live Refresh] Current report keys:', currentKeys.length);
+    
+                currentReports.forEach(r => {
+                    const key = getReportKey(r);
+                    if (key && !newKeys.has(key)) {
+                        console.log(`[Live Refresh] Report ${key} is missing (resolved)`);
+                        r.style.opacity = '0.5';
+                        r.style.background = '#444';
+                    }
+                });
+    
+                const container = document.querySelectorAll('.structItemContainer')[0];
+                openReportsNew.forEach(r => {
+                    const key = getReportKey(r);
+                    if (key && !currentKeys.has(key)) {
+                        console.log(`[Live Refresh] New report detected: ${key}`);
+                        const clone = r.cloneNode(true);
+                        container.insertBefore(clone, container.firstChild);
+                    }
+                });
+    
+                hoistReports();
+            },
+            onerror: function (err) {
+                console.error('Live refresh failed:', err);
+            }
+        });
     }
 
     function startLiveRefresh() {
