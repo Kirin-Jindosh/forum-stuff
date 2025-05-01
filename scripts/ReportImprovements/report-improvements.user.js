@@ -15,6 +15,8 @@
     const STORAGE_KEY = 'xf-report-filter-allowedForums';
     const LIVE_REFRESH_KEY = 'xf-report-filter-liveRefreshEnabled';
     const REFRESH_INTERVAL = 15000;
+    const TAB_ID = `tab-${Math.random().toString(36).substr(2, 9)}`;
+    const HEARTBEAT_KEY = 'xf-report-refresh-heartbeat';
     const ICON_URL = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png';
 
     let refreshIntervalId = null;
@@ -112,6 +114,18 @@
         btn.title = 'Filter settings';
         document.body.appendChild(btn);
 
+        const warningIcon = document.createElement('div');
+        warningIcon.id = 'xf-refresh-warning-icon';
+        warningIcon.textContent = '🔕';
+        warningIcon.style.position = 'fixed';
+        warningIcon.style.bottom = '20px';
+        warningIcon.style.right = '105px';
+        warningIcon.style.zIndex = '1000';
+        warningIcon.style.fontSize = '20px';
+        warningIcon.style.display = 'none';
+        warningIcon.title = 'Something needs your attention';
+        document.body.appendChild(warningIcon);
+
         const popup = document.createElement('div');
         popup.style.position = 'fixed';
         popup.style.bottom = '60px';
@@ -125,6 +139,9 @@
         popup.style.display = 'none';
 
         popup.innerHTML = `
+            <div id="xf-live-refresh-warning" style="color:rgb(218, 20, 20); margin-top: 8px; display: none;">
+                Live refresh is enabled in another tab. This tab will not auto-update.
+            </div>
             <label style="font-weight: bold; display:block; margin-bottom: 5px;">Subforums to highlight (one per line):</label>
             <textarea id="xf-forum-editor" style="width: 200px; height: 100px;"></textarea><br>
             <label style="display:block; margin-top:10px;">
@@ -140,6 +157,7 @@
             document.getElementById('xf-forum-editor').value = current.join('\n');
             document.getElementById('xf-live-refresh-toggle').checked = isLiveRefreshEnabled();
             popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+            updateTabStatusWarning();
         });
 
         document.getElementById('xf-save-forums').addEventListener('click', () => {
@@ -151,11 +169,16 @@
             setLiveRefreshEnabled(document.getElementById('xf-live-refresh-toggle').checked);
             hoistReports();
             popup.style.display = 'none';
+            updateTabStatusWarning();
             restartLiveRefresh();
         });
     }
 
     function checkForReportUpdates() {
+        if (!isMasterTab()) {
+            return;
+        }
+
         GM_xmlhttpRequest({
             method: 'GET',
             url: window.location.href,
@@ -230,9 +253,43 @@
         }, 200);
     }
 
+    function startHeartbeat() {
+        setInterval(() => {
+            const data = {
+                tabId: TAB_ID,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(HEARTBEAT_KEY, JSON.stringify(data));
+        }, 3000);
+    }
+
+    function isMasterTab() {
+        const data = JSON.parse(localStorage.getItem(HEARTBEAT_KEY) || '{}');
+        const isLeader = data.tabId === TAB_ID;
+        const isRecent = Date.now() - data.timestamp < 7000;
+        return isLeader && isRecent;
+    }
+
+    function updateTabStatusWarning() {
+        const isLeader = isMasterTab();
+        const refreshEnabled = isLiveRefreshEnabled();
+        const warningText = document.getElementById('xf-live-refresh-warning');
+        const warningIcon = document.getElementById('xf-refresh-warning-icon');
+    
+        if (refreshEnabled && !isLeader) {
+            warningText.style.display = 'block';
+            warningIcon.style.display = 'block';
+        } else {
+            warningText.style.display = 'none';
+            warningIcon.style.display = 'none';
+        }
+    }
+
     waitForReportsContainer(() => {
         hoistReports();
         createSettingsUI();
+        startHeartbeat();
+        setInterval(updateTabStatusWarning, 5000);
         restartLiveRefresh();
     });
 })();
