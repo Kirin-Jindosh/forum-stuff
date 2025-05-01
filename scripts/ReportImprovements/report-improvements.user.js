@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Report Improvements
-// @version      1.5.0
+// @version      1.5.1
 // @description  Various improvements to XenForo reports
 // @author       Jindosh
 // @match        *://*/reports/*
@@ -17,9 +17,11 @@
     const REFRESH_INTERVAL = 15000;
     const TAB_ID = `tab-${Math.random().toString(36).substr(2, 9)}`;
     const HEARTBEAT_KEY = 'xf-report-refresh-heartbeat';
+    const MAX_IDLE_TIME = 2 * 60 * 1000
     const ICON_URL = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png';
 
     let refreshIntervalId = null;
+    let lastInteraction = Date.now();
 
     function getAllowedForums() {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -179,6 +181,11 @@
             return;
         }
 
+        if (Date.now() - lastInteraction > MAX_IDLE_TIME) {
+            console.log('[Live Refresh] Tab idle too long — skipping refresh');
+            return;
+        }
+
         GM_xmlhttpRequest({
             method: 'GET',
             url: window.location.href,
@@ -291,11 +298,20 @@
         }
     }
 
+    function tabActivity(){
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                lastInteraction = Date.now();
+            }
+        });
+    }
+
     waitForReportsContainer(() => {
         hoistReports();
         createSettingsUI();
         startHeartbeat();
         setInterval(updateTabStatusWarning, 5000);
+        tabActivity();
         restartLiveRefresh();
     });
 })();
