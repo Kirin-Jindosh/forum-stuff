@@ -24,6 +24,7 @@
     const HEARTBEAT_KEY = 'xf-report-refresh-heartbeat';
     const MAX_IDLE_TIME = 5 * 60 * 1000;
     const ICON_URL = 'https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/dev/scripts/ReportImprovements/PepeHmmm.png';
+    const RELIABLE_SCROLL_KEY = 'xf-thread-reliable-scroll';
 
     let refreshIntervalId = null;
     let lastInteraction = Date.now();
@@ -203,6 +204,8 @@
 
         observer.observe(el);
 
+        const reliableMode = localStorage.getItem(RELIABLE_SCROLL_KEY) === 'true';
+
         setTimeout(() => {
             observer.disconnect();
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -210,11 +213,13 @@
             setTimeout(() => el.classList.remove('xf-flash-highlight'), 1000);
         }, 2000);
 
-        setTimeout(() => {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            el.classList.add('xf-flash-highlight');
-            setTimeout(() => el.classList.remove('xf-flash-highlight'), 1000);
-        }, 3000);
+        if (reliableMode) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                el.classList.add('xf-flash-highlight');
+                setTimeout(() => el.classList.remove('xf-flash-highlight'), 1000);
+            }, 3000);
+        }
     }
 
 
@@ -293,6 +298,9 @@
                 <label style="font-weight: bold; display:block; margin-bottom: 5px;">Jump to post number:</label>
                 <input id="xf-jump-post-number" type="number" min="1" style="width: 100%; margin-bottom: 8px;"><br>
                 <button id="xf-jump-post-button" style="width: 100%;">Go to post</button>
+                <label style="display:block; margin-top:10px;">
+                    <input type="checkbox" id="xf-reliable-scroll-toggle"> Attempt scroll again after 3s
+                </label>
             `;
         }
 
@@ -305,7 +313,11 @@
             if (opening && IS_THREADS_PAGE) {
                 const jumpInput = document.getElementById('xf-jump-post-number');
                 if (jumpInput) jumpInput.focus();
+
+                const reliableScroll = localStorage.getItem(RELIABLE_SCROLL_KEY) !== 'false';
+                document.getElementById('xf-reliable-scroll-toggle').checked = reliableScroll;
             }
+            
             if (IS_REPORTS_PAGE) {
                 const current = getAllowedForums();
                 document.getElementById('xf-forum-editor').value = current.join('\n');
@@ -359,6 +371,9 @@
                     sessionStorage.setItem('xf-scroll-to-post-number', postNumber);
                     window.location.href = `${baseUrl}/page-${desiredPage}#post-${postNumber}`;
                 }
+            });
+            document.getElementById('xf-reliable-scroll-toggle').addEventListener('change', (e) => {
+                localStorage.setItem(RELIABLE_SCROLL_KEY, e.target.checked.toString());
             });
         }
     }
