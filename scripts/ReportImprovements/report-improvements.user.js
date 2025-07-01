@@ -3,7 +3,7 @@
 // @version      1.6
 // @description  Various improvements to XenForo reports
 // @author       Jindosh
-// @match        *://ity.su/*
+// @match        *://*ity.su/*
 // @updateURL    https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/report-improvements.user.js
 // @downloadURL  https://raw.githubusercontent.com/Kirin-Jindosh/forum-stuff/refs/heads/main/scripts/ReportImprovements/report-improvements.user.js
 // @grant        GM_xmlhttpRequest
