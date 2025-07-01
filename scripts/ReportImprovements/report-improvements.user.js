@@ -282,12 +282,30 @@
                 const postNumber = parseInt(input.value, 10);
                 if (!postNumber || postNumber < 1) return;
 
-                const page = Math.ceil(postNumber / 20);
+                const postsPerPage = 20;
+                const desiredPage = Math.ceil(postNumber / postsPerPage);
                 const currentUrl = window.location.href;
+                const currentMatch = currentUrl.match(/\/page-(\d+)/);
+                const currentPage = currentMatch ? parseInt(currentMatch[1], 10) : 1;
+
                 const baseUrl = currentUrl.replace(/\/page-\d+.*$/, '').split('#')[0];
 
-                localStorage.setItem('xf-scroll-to-post-number', postNumber);
-                window.location.href = `${baseUrl}/page-${page}#post-${postNumber}`;
+                if (desiredPage === currentPage) {
+                    const anchors = [...document.querySelectorAll('a[href*="/post-"]')]
+                        .filter(a => a.textContent.trim() === `#${postNumber}`);
+                    if (anchors.length > 0) {
+                        const postAnchor = anchors[0];
+                        const postContainer = postAnchor.closest('.message');
+                        if (postContainer) {
+                            postContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            postContainer.classList.add('xf-flash-highlight');
+                            setTimeout(() => postContainer.classList.remove('xf-flash-highlight'), 800);
+                        }
+                    }
+                } else {
+                    localStorage.setItem('xf-scroll-to-post-number', postNumber);
+                    window.location.href = `${baseUrl}/page-${desiredPage}#post-${postNumber}`;
+                }
             });
         }
     }
