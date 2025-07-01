@@ -176,10 +176,27 @@
         const postContainer = postAnchor.closest('.message');
 
         if (postContainer) {
-            postContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            smoothScrollWithRetries(postContainer);
             postContainer.classList.add('xf-flash-highlight');
             setTimeout(() => postContainer.classList.remove('xf-flash-highlight'), 1500);
         }
+    }
+
+    function smoothScrollWithRetries(el, attempts = 5) {
+        let tries = 0;
+
+        const tryScroll = () => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            tries++;
+            if (tries < attempts) {
+                setTimeout(tryScroll, 500);
+            } else {
+                el.classList.add('xf-flash-highlight');
+                setTimeout(() => el.classList.remove('xf-flash-highlight'), 800);
+            }
+        };
+
+        tryScroll();
     }
 
     function createSettingsUI() {
