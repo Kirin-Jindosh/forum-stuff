@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Report Improvements
-// @version      1.6.1
+// @version      1.6.2
 // @description  Various improvements to XenForo reports
 // @author       Jindosh
 // @match        *://*ity.su/*
@@ -246,7 +246,13 @@
         document.body.appendChild(popup);
 
         btn.addEventListener('click', () => {
-            popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+            const opening = popup.style.display === 'none';
+            popup.style.display = opening ? 'block' : 'none';
+
+            if (opening && IS_THREADS_PAGE) {
+                const jumpInput = document.getElementById('xf-jump-post-number');
+                if (jumpInput) jumpInput.focus();
+            }
             if (IS_REPORTS_PAGE) {
                 const current = getAllowedForums();
                 document.getElementById('xf-forum-editor').value = current.join('\n');
