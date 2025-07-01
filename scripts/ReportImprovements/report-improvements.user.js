@@ -162,25 +162,61 @@
     }
 
     function tryScrollToPost() {
-        const num = parseInt(localStorage.getItem('xf-scroll-to-post-number'), 10);
+        const num = parseInt(sessionStorage.getItem('xf-scroll-to-post-number'), 10);
         if (!num || isNaN(num)) return;
 
-        localStorage.removeItem('xf-scroll-to-post-number');
+        sessionStorage.removeItem('xf-scroll-to-post-number');
 
         const anchors = [...document.querySelectorAll('a[href*="/post-"]')]
             .filter(a => a.textContent.trim() === `#${num}`);
 
-        if (anchors.length === 0) return;
+        if (anchors.length === 0) {
+            console.warn('[ScrollDebug] No matching anchor found for post #', num);
+            return;
+        }
 
         const postAnchor = anchors[0];
         const postContainer = postAnchor.closest('.message');
 
         if (postContainer) {
-            smoothScrollWithRetries(postContainer);
-            postContainer.classList.add('xf-flash-highlight');
-            setTimeout(() => postContainer.classList.remove('xf-flash-highlight'), 1500);
+            scrollToPostWhenVisible(postContainer);
+        } else {
+            console.warn('[ScrollDebug] No post container found for anchor');
         }
     }
+
+
+    function scrollToPostWhenVisible(el) {
+        if (!el) return;
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            const entry = entries[0];
+            if (entry.intersectionRatio > 0.1) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                el.classList.add('xf-flash-highlight');
+                setTimeout(() => el.classList.remove('xf-flash-highlight'), 1000);
+                obs.disconnect();
+            }
+        }, {
+            threshold: 0.1
+        });
+
+        observer.observe(el);
+
+        setTimeout(() => {
+            observer.disconnect();
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.add('xf-flash-highlight');
+            setTimeout(() => el.classList.remove('xf-flash-highlight'), 1000);
+        }, 2000);
+
+        setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.add('xf-flash-highlight');
+            setTimeout(() => el.classList.remove('xf-flash-highlight'), 1000);
+        }, 3000);
+    }
+
 
     function smoothScrollWithRetries(el, attempts = 5) {
         let tries = 0;
@@ -320,7 +356,7 @@
                         }
                     }
                 } else {
-                    localStorage.setItem('xf-scroll-to-post-number', postNumber);
+                    sessionStorage.setItem('xf-scroll-to-post-number', postNumber);
                     window.location.href = `${baseUrl}/page-${desiredPage}#post-${postNumber}`;
                 }
             });
@@ -460,6 +496,24 @@
 
     if (IS_THREADS_PAGE) {
         setupJumpToPost();
-        setTimeout(tryScrollToPost, 500);
+
+        const maxAttempts = 15;
+        let attempts = 0;
+
+        const waitForPostAnchor = setInterval(() => {
+            const num = parseInt(sessionStorage.getItem('xf-scroll-to-post-number'), 10);
+            if (!num || isNaN(num)) {
+                clearInterval(waitForPostAnchor);
+                return;
+            }
+
+            const anchors = [...document.querySelectorAll('a[href*="/post-"]')]
+                .filter(a => a.textContent.trim() === `#${num}`);
+
+            if (anchors.length > 0 || ++attempts >= maxAttempts) {
+                clearInterval(waitForPostAnchor);
+                tryScrollToPost();
+            }
+        }, 200);
     }
 })();
