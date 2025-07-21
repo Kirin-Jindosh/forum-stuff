@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Report Improvements
-// @version      1.6.2
+// @version      1.6.3
 // @description  Various improvements to XenForo reports
 // @author       Jindosh
 // @match        *://*ity.cr/*
